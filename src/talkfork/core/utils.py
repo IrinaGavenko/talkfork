@@ -33,7 +33,7 @@ def to_short_names(array):
 
     result = ""
     for element in array:
-        result += element['short_name'] + ", "
+        result += get_user_by_id(element)['short_name'] + ", "
     return result[:-2]
 
 
@@ -43,10 +43,10 @@ def get_comments(thread_id):
     return json.loads(comments.text)
 
 
-def get_username_by_id(user_id):
+def get_user_by_id(user_id):
     comments = requests.get('https://api.twistapp.com/api/v2/users/getone',
                             headers=oauth2_headers, params={'id': user_id})
-    return json.loads(comments.text)['name']
+    return json.loads(comments.text)
 
 
 def watch_comments():
@@ -75,20 +75,22 @@ def watch_comments():
     messages, users = (get_comment_data(comments_parsed), default_thread['participants'])
     ml = ML(users)
     clusters, graph = ml.get_clusters_and_graph(messages)
+    print(clusters)
 
     if clusters:
-        send_comment(default_thread, "Hi {}! Seems like your TALK deserves being FORKED. Just type /yes and I'll take care of the rest."
-                     .format([get_username_by_id(user) for user in clusters]))
+        print("sending")
+        send_comment(default_thread["id"], "Hi {}! Seems like your TALK deserves being FORKED. Just type /yes and I'll take care of the rest."
+                     .format(", ".join([get_user_by_id(user)['name'] for user in clusters])))
         GROUPS.append(clusters)
     return graph
 
 
 def send_comment(thread_id, message, as_user=False, recipients=[]):
 
-     requests.post('https://api.twistapp.com/api/v2/comments/add',
+     print(requests.post('https://api.twistapp.com/api/v2/comments/add',
                    data={'thread_id': thread_id, 'content': message,
                          'send_as_integration': not as_user, 'recipients': recipients},
-                   headers=oauth2_headers)
+                   headers=oauth2_headers).text)
 
 
 def move_users_comments(channel_id, thread_id, users_to_move):
@@ -98,9 +100,8 @@ def move_users_comments(channel_id, thread_id, users_to_move):
     comments_to_move = []
 
     # Detect comments to delete
-    users_to_move_ids = [user['id'] for user in users_to_move]
     for comment in comments:
-        if comment['creator'] in users_to_move_ids:
+        if comment['creator'] in users_to_move:
             comments_to_move.append(comment)
 
     print(comments)
@@ -110,7 +111,7 @@ def move_users_comments(channel_id, thread_id, users_to_move):
                                data={'channel_id': str(channel_id),
                                      'title': 'FORKED BY ' + to_short_names(users_to_move),
                                      'content': 'Thread forked by ' + to_short_names(users_to_move),
-                                     'recipients': str([element['id'] for element in users_to_move]),
+                                     'recipients': str([element for element in users_to_move]),
                                      'send_as_integration': 'true'},
                                headers=oauth2_headers)
     new_thread_parsed = json.loads(new_thread.text)
@@ -118,7 +119,7 @@ def move_users_comments(channel_id, thread_id, users_to_move):
     for comment in comments_to_move:
         requests.post('https://api.twistapp.com/api/v2/comments/add',
                       data={'thread_id': new_thread_parsed['id'],
-                            'content': '**' + get_username_by_id(comment['creator']) + ':** ' + comment['content'],
+                            'content': '**' + get_user_by_id(comment['creator'])['name'] + ':** ' + comment['content'],
                             'send_as_integration': 'true'},
                       headers=oauth2_headers)
         IGNORE_MESSAGES.append(comment["id"])

@@ -46,18 +46,18 @@ def similarity(s1, s2):
 class ML:
     def __init__(self, users):
         self.users = users[:]
-        print(len(users))
 
     def convert_graph(self, graph):
         data = []
-        print(len(self.users))
         for i in range(len(self.users)):
             for j in range(i + 1, len(self.users)):
-                print(i, j)
                 data.append({"source": self.users[i], "target": self.users[j], "link_distance": graph[i][j]})
         return data
 
     def get_graph(self, messages):
+        messages = [el for el in messages if el["text"] != '-']
+        for i, message in enumerate(messages):
+            message["time"] = i
         graph = np.array([[0 for el2 in self.users] for el in self.users], dtype="float")
         for message in messages:
             from_id = self.users.index(message["user"])
@@ -66,7 +66,6 @@ class ML:
                 if to_id < from_id:
                     from_id, to_id = to_id, from_id
                 graph[from_id][to_id] += 1
-        print(graph)
         message_graph = np.array([[0 for el2 in self.users] for el in self.users], dtype="float")
         counts = np.array([[0 for el2 in self.users] for el in self.users])
         for i in range(len(messages)):
@@ -92,14 +91,16 @@ class ML:
             idx += len(matrix)-r-1
         linkage = sch.linkage(dists_cond, method="single")
         clusters = sch.cut_tree(linkage, height=0.7*np.max(dists_cond))
+        print(clusters)
         counter = Counter(clusters.flatten())
         cluster, count = counter.most_common(1)[0]
         if count >= 2:
+            print(cluster)
             users = []
             for i in range(len(self.users)):
                 if clusters[i] == cluster:
                     users.append(self.users[i])
-                    return users
+            return users
         return False
 
     def get_clusters_and_graph(self, messages):
