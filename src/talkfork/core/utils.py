@@ -1,6 +1,7 @@
 import requests
 import json
 from django.conf import settings
+from .ml import ML
 
 oauth2_headers = {'Authorization': 'Bearer ' + settings.TWIST_API_KEY}
 
@@ -24,6 +25,9 @@ def get_comment_data(comments_parsed, max_messages_count=100):
     return data
 
 
+GROUPS = []
+IGNORE_MESSAGES = []
+
 def watch_comments():
 
     channels = requests.get('https://api.twistapp.com/api/v2/workspaces/get',
@@ -37,14 +41,33 @@ def watch_comments():
     comments = requests.get('https://api.twistapp.com/api/v2/comments/get',
                             headers=oauth2_headers, params={'thread_id': default_thread['id']})
     comments_parsed = json.loads(comments.text)
-    data = (get_comment_data(comments_parsed), default_thread['participants'])
+    on_yes(comments_parsed)
+    messages, users = (get_comment_data(comments_parsed), default_thread['participants'])
+    ml = ML(users)
+    clusters, graph = ml.get_clusters_and_graph(messages)
 
-    user = requests.get('https://api.twistapp.com/api/v2/users/getone',
-                        headers=oauth2_headers)
+    # user = requests.get('https://api.twistapp.com/api/v2/users/getone',
+    #                     headers=oauth2_headers)
+    #
+    # move_users_comments(default_channel_id, default_thread['id'], [], [json.loads(user.text)['id']])
 
-    move_users_comments(default_channel_id, default_thread['id'], [], [json.loads(user.text)['id']])
+    if clusters:
+        send_comment(default_thread, "Hi {}! Seems like your TALK deserves being FORKED. Just type /yes and I'll take care of the rest."
+                     .format([get_name(user) for user in clusters]))
+        GROUPS.append(clusters)
+    return graph
 
-    return []
+def on_yes(comments):
+    for comment in comments:
+        if comment["content"] != "/yes":
+            continue
+        if comment["id"] in IGNORE_MESSAGES:
+            continue
+        IGNORE_MESSAGES.append(comment["id"])
+        for group in GROUPS:
+            if comment["creator"] in group:
+                cut_group(comment["creator"])
+                GROUPS.remove(group)
 
 
 def send_comment(thread_id, message):
