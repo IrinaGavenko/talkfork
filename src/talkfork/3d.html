@@ -5,66 +5,11 @@
     <title>I'll do that!!!</title>
     <script src="http://d3js.org/d3.v3.min.js" charset="utf-8"></script>
     <style type="text/css">
-        h1 {
-            color: lightseagreen;
-            padding: 0px;
-            margin-left: 18px;
-            font-family: Arial;
-            font-size: 350%;
-            font-weight: lighter;
-        }
-        a {
-            text-decoration: none;
-            font-family: Arial;
-            font-size: 100%;
-            color: black;
-            position: relative;
-            top: 70px;
-            margin-left: 45px;
-        }
-        a:active {
-            font-weight: bold;
-        }
 
-        .threads {
-            color: lightseagreen;
-            font-weight: bold;
-            font-family: Arial;
-            font-size: 120%;
-            z-index: -100;
-            position: absolute;
-            top: 141px;
-            width: 170px;
-            height: 350px;
-            background: #ffffff;
-            border: 1px solid lightseagreen;
-            padding: 15px;
-            margin-left: 23px;
-        }
-
-        .d3 {
-            position: absolute;
-            top: 141px;
-            margin-left: 330px;
-            padding: 10px;
-            border: 3px solid lightseagreen;
-        }
     </style>
 </head>
 <body>
 
-<header>
-<h1> Our name </h1>
-</header>
-
-<p><a href="#">threadthreadthread1</a></p>
-<p><a href="#">threadthread2</a></p>
-<p><a href="#">threadthread3</a></p>
-<p><a href="#">threadthreadthread4</a></p>
-<p><a href="#">threadthread5</a></p>
-<div class="threads"> Select chat: </div>
-
-<div class="d3">
 <script type="text/javascript">
 
     var w = 640;
@@ -72,8 +17,6 @@
 
     var colors = d3.scale.category10();
     var svg = d3.select("body").append("svg").attr({"width": w, "height": h});
-//    svg.append("xhtml:div")
-//        .style("height", "250px")
 
     d3.json(" ", function (data_nodes) { // insert link
 //        var dataset = {
@@ -176,6 +119,5 @@
     });
 
 </script>
-</div>>
 </body>
 </html>
