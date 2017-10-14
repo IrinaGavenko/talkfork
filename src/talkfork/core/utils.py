@@ -145,4 +145,4 @@ def get_usernames():
     channel = requests.get('https://api.twistapp.com/api/v2/channels/getone',
                             headers=oauth2_headers, params={'id': channel_id})
     user_ids = json.loads(channel.text)['user_ids']
-    return [get_username_by_id(user_id) for user_id in user_ids]
+    return [{"name": get_user_by_id(user_id)['name']} for user_id in user_ids]

@@ -52,7 +52,7 @@ class ML:
         data = []
         for i in range(len(self.users)):
             for j in range(i + 1, len(self.users)):
-                data.append({"source": self.users[i], "target": self.users[j], "link_distance": graph[i][j]})
+                data.append({"source": j, "target": i, "link_distance": 100 * graph[i][j]})
         return data
 
     def get_graph(self, messages):

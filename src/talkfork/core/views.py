@@ -25,7 +25,6 @@ def usernames(request):
 
 
 def index(request):
-    watch_comments()
     return render(request, 'index.html')
 
 

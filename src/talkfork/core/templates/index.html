@@ -1,147 +1,123 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    {% load static %}
     <meta charset="utf-8">
-    <title>TalkFork</title>
+    <title>TalkFORK</title>
     <script src="http://d3js.org/d3.v3.min.js" charset="utf-8"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/vue/2.5.2/vue.min.js" charset="utf-8"></script>
+    <script src="http://code.jquery.com/jquery-latest.min.js" charset="utf-8"></script>
+
+    <link rel="shortcut icon" type="image/png" href="{% static "favicon.png" %}"/>
+    <link rel="stylesheet" type="text/css" href="//fonts.googleapis.com/css?family=Open+Sans" />
+
+    <style>
+        .header {
+            font-family: "Open Sans", Helvetica, Arial, sans-serif;
+            margin-top: 30px;
+            font-size: 70px;
+            width: 100%;
+            text-align: center;
+            color: #516488;
+        }
+        body {
+            background: #a1ffce;
+            background: -webkit-linear-gradient(to right, #a1ffce, #faffd1);
+            background: linear-gradient(to right, #a1ffce, #faffd1);
+        }
+    </style>
+
 </head>
 <body>
-<div id="#graph">
-<div id="#graph-template">
-    <div v-if="isNotLoaded">Loading...</div>
-    <div v-else><div id="graph-body"></div></div>
-</div>
-</div>
-</body>
-<script type="text/javascript">
 
-    var w = 640;
-    var h = 350;
+<h1 class="header">TalkFORK</h1>
+</body>
+<script>
+
+    var w = 1000;
+    var h = 600;
 
     var colors = d3.scale.category10();
-    var svg = d3.select("#graph-body").append("svg").attr({"width": w, "height": h});
 
-    let Graph = {
-        template: '#graph-template',
-        created() {
-            this.loadNames()
-        },
-        data: function () {
-            return {
-                graph: null,
-            }
-        },
-        methods: {
-            loadNames() {
-                $.ajax({
-                    url: "api/usernames",
-                    success: function (data_nodes) {
-                        $.ajax({
-                            url: 'api/comments',
-                            dataType: 'json',
-                            success: function (data_edges) {
-                                var force = d3.layout.force()
-                                    .nodes(data_nodes)
-                                    .links(data_edges)
-                                    .size([w, h])
-                                    .charge([-500])
-                                    .theta(0.1)
-                                    .gravity(0.05)
-                                    .linkDistance("link", function (d) {
-                                        return d.link_distance
-                                    })
-                                    .start();
+    $.ajax({
+        url: '/api/usernames/',
+        dataType: 'json',
+        success: function(dataNodes) {
+            $.ajax({
+                url: '/api/comments/',
+                dataType: 'json',
+                success: function(dataEdges) {
+                    var svg = d3.select("body").append("svg").attr({"width":w,"height":h});
 
-                                var edges = svg.selectAll("line")
-                                    .data(data_edges)
-                                    .enter()
-                                    .append("line")
-                                    .attr("id", function (d, i) {
-                                        return 'edge' + i
-                                    })
-                                    .style("stroke", "#ccc");
+                    var force = d3.layout.force()
+                        .nodes(dataNodes)
+                        .links(dataEdges)
+                        .size([w,h])
+                        .linkDistance(function(d) {return d.link_distance})
+                        .charge([-500])
+                        .theta(0.1)
+                        .gravity(0.05)
+                        .start();
 
-                                var nodes = svg.selectAll("circle")
-                                    .data(data_nodes)
-                                    .enter()
-                                    .append("circle")
-                                    .attr({"r": 15})
-                                    .style("fill", function (d, i) {
-                                        return colors(i);
-                                    })
-                                    .call(force.drag);
-
-                                var nodelabels = svg.selectAll(".nodelabel")
-                                    .data(data_nodes)
-                                    .enter()
-                                    .append("text")
-                                    .attr({
-                                        "x": function (d) {
-                                            return d.x;
-                                        },
-                                        "y": function (d) {
-                                            return d.y;
-                                        },
-                                        "class": "nodelabel",
-                                        "stroke": "black"
-                                    })
-                                    .text(function (d) {
-                                        return d.name;
-                                    });
-
-                                force.on("tick", function () {
-
-                                    edges.attr({
-                                        "x1": function (d) {
-                                            return d.source.x;
-                                        },
-                                        "y1": function (d) {
-                                            return d.source.y;
-                                        },
-                                        "x2": function (d) {
-                                            return d.target.x;
-                                        },
-                                        "y2": function (d) {
-                                            return d.target.y;
-                                        }
-                                    });
-
-                                    nodes.attr({
-                                        "cx": function (d) {
-                                            return d.x;
-                                        },
-                                        "cy": function (d) {
-                                            return d.y;
-                                        }
-                                    });
-
-                                    nodelabels.attr("x", function (d) {
-                                        return d.x;
-                                    })
-                                        .attr("y", function (d) {
-                                            return d.y;
-                                        });
-                                });
-                            }
+                    var edges = svg.selectAll("line")
+                        .data(dataEdges)
+                        .enter()
+                        .append("line")
+                        .attr("id",function(d,i) {return 'edge'+i})
+                        .style("stroke","#ccc")
+                        .style("pointer-events", "none");
+                
+                    var nodes = svg.selectAll("circle")
+                        .data(dataNodes)
+                        .enter()
+                        .append("circle")
+                        .attr({"r":15})
+                        .style("fill",function(d,i){return colors(i);})
+                        .call(force.drag)
+                
+                
+                    var nodelabels = svg.selectAll(".nodelabel")
+                        .data(dataNodes)
+                        .enter()
+                        .append("text")
+                        .attr({"x":function(d){return d.x;},
+                            "y":function(d){return d.y;},
+                            "class":"nodelabel"})
+                        .text(function(d){return d.name;});
+                
+                    var edgepaths = svg.selectAll(".edgepath")
+                        .data(dataEdges)
+                        .enter()
+                        .append('path')
+                        .attr({'d': function(d) {return 'M '+d.source.x+' '+d.source.y+' L '+ d.target.x +' '+d.target.y},
+                            'class':'edgepath',
+                            'fill-opacity':0,
+                            'stroke-opacity':0,
+                            'fill':'blue',
+                            'stroke':'red',
+                            'id':function(d,i) {return 'edgepath'+i}})
+                        .style("pointer-events", "none");
+                
+                    force.on("tick", function(){
+                
+                        edges.attr({"x1": function(d){return d.source.x;},
+                            "y1": function(d){return d.source.y;},
+                            "x2": function(d){return d.target.x;},
+                            "y2": function(d){return d.target.y;}
                         });
-                    }
-                });
-            }
-        },
-        computed: {
-            isNotLoaded() {
-                return (this.graph === null)
-            },
-        }
-    };
-
-    new Vue({
-        el: '#graph',
-        components: {
-            graph: Graph,
+                
+                        nodes.attr({"cx":function(d){return d.x;},
+                            "cy":function(d){return d.y;}
+                        });
+                
+                        nodelabels.attr("x", function(d) { return d.x; })
+                            .attr("y", function(d) { return d.y; });
+                
+                    });
+                }
+            });
         }
     });
+    
 
 </script>
 </html>
