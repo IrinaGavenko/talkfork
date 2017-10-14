@@ -45,19 +45,20 @@ def similarity(s1, s2):
 
 class ML:
     def __init__(self, users):
-        self.users = users
+        self.users = users[:]
+        print(len(users))
 
     def convert_graph(self, graph):
         data = []
+        print(len(self.users))
         for i in range(len(self.users)):
             for j in range(i + 1, len(self.users)):
+                print(i, j)
                 data.append({"source": self.users[i], "target": self.users[j], "link_distance": graph[i][j]})
         return data
 
     def get_graph(self, messages):
         graph = np.array([[0 for el2 in self.users] for el in self.users], dtype="float")
-        for message in messages:
-            self.users.append(message["user"])
         for message in messages:
             from_id = self.users.index(message["user"])
             for to_user in message["recipients"]:
@@ -91,8 +92,8 @@ class ML:
             idx += len(matrix)-r-1
         linkage = sch.linkage(dists_cond, method="single")
         clusters = sch.cut_tree(linkage, height=0.7*np.max(dists_cond))
-        counter = Counter(clusters)
-        cluster, count = counter.most_common(1)
+        counter = Counter(clusters.flatten())
+        cluster, count = counter.most_common(1)[0]
         if count >= 2:
             users = []
             for i in range(len(self.users)):

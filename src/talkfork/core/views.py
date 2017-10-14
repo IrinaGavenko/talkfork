@@ -16,7 +16,7 @@ def oauth2(request):
 
 def comments(request):
 
-    return JsonResponse(watch_comments())
+    return JsonResponse(watch_comments(), safe=False)
 
 
 def index(request):

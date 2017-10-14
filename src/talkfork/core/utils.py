@@ -11,7 +11,7 @@ def get_comment_data(comments_parsed, max_messages_count=100):
     data = []
     for comment in comments_parsed[:max_messages_count]:
         comment_data = dict()
-        comment_data['user_id'] = comment['creator']
+        comment_data['user'] = comment['creator']
 
         if comment['recipients'] == 'EVERYONE' or comment['recipients'] == 'EVERYONE_IN_THREAD':
             comment_data['recipients'] = []
@@ -19,7 +19,7 @@ def get_comment_data(comments_parsed, max_messages_count=100):
             comment_data['recipients'] = comment['recipients']
 
         comment_data['time'] = comment['posted_ts']
-        comment_data['message'] = comment['content']
+        comment_data['text'] = comment['content']
         data.append(comment_data)
 
     return data
@@ -62,7 +62,7 @@ def watch_comments():
     comments = requests.get('https://api.twistapp.com/api/v2/comments/get',
                             headers=oauth2_headers, params={'thread_id': default_thread['id']})
     comments_parsed = json.loads(comments.text)
-    for comment in comments:
+    for comment in comments_parsed:
         if comment["content"] != "/yes":
             continue
         if comment["id"] in IGNORE_MESSAGES:
@@ -76,20 +76,19 @@ def watch_comments():
     ml = ML(users)
     clusters, graph = ml.get_clusters_and_graph(messages)
 
-
-
     if clusters:
         send_comment(default_thread, "Hi {}! Seems like your TALK deserves being FORKED. Just type /yes and I'll take care of the rest."
-                     .format([get_name(user) for user in clusters]))
+                     .format([get_username_by_id(user) for user in clusters]))
         GROUPS.append(clusters)
     return graph
 
+
 def send_comment(thread_id, message, as_user=False, recipients=[]):
 
-    res = requests.post('https://api.twistapp.com/api/v2/comments/add',
-                  data={'thread_id': thread_id, 'content': message,
-                        'send_as_integration': not as_user, 'recipients': recipients},
-                  headers=oauth2_headers)
+     requests.post('https://api.twistapp.com/api/v2/comments/add',
+                   data={'thread_id': thread_id, 'content': message,
+                         'send_as_integration': not as_user, 'recipients': recipients},
+                   headers=oauth2_headers)
 
 
 def move_users_comments(channel_id, thread_id, users_to_move):
@@ -123,7 +122,6 @@ def move_users_comments(channel_id, thread_id, users_to_move):
                             'send_as_integration': 'true'},
                       headers=oauth2_headers)
         IGNORE_MESSAGES.append(comment["id"])
-
 
     # Remove comments
     for comment in comments_to_move:
