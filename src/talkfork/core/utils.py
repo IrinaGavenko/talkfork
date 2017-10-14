@@ -54,8 +54,58 @@ def watch_comments():
     messages, users = (get_comment_data(comments_parsed), default_thread['participants'])
     ml = ML(users)
     clusters, graph = ml.get_clusters_and_graph(messages)
+
+    # user = requests.get('https://api.twistapp.com/api/v2/users/getone',
+    #                     headers=oauth2_headers)
+    #
+    # move_users_comments(default_channel_id, default_thread['id'], [], [json.loads(user.text)['id']])
+
     if clusters:
         send_comment(default_thread, "Hi {}! Seems like your TALK deserves being FORKED. Just type /yes and I'll take care of the rest."
                      .format([get_name(user) for user in clusters]))
         GROUPS.append(clusters)
     return graph
+
+def send_comment(thread_id, message):
+
+    requests.post('https://api.twistapp.com/api/v2/comments/add',
+                  data={'thread_id': thread_id, 'content': message},
+                  headers=oauth2_headers)
+
+
+def move_users_comments(channel_id, thread_id, comments, users_to_move):
+
+    comments = requests.get('https://api.twistapp.com/api/v2/comments/get',
+                            headers=oauth2_headers, params={'thread_id': thread_id})
+    comments = json.loads(comments.text)
+
+    comments_to_move = []
+
+    # Detect comments to delete
+    for comment in comments:
+        if comment['creator'] in users_to_move:
+            comments_to_move.append(comment['id'])
+
+    # Create new thread and move comments to it
+    new_thread = requests.post('https://api.twistapp.com/api/v2/threads/add',
+                               data={'channel_id': channel_id,
+                                     'title': '',
+                                     'content': 'Forked thread of ',
+                                     'recipients': users_to_move},
+                               headers=oauth2_headers)
+
+    new_thread = json.loads(new_thread.text)
+    print(new_thread)
+    #
+    # for comment in comments_to_move:
+    #     requests.post('https://api.twistapp.com/api/v2/comments/add',
+    #                   data={'thread_id': new_thread['id'], 'content': comment['content']},
+    #                   headers=oauth2_headers)
+    #
+    # # Remove comments
+    # for comment in comments_to_move:
+    #     requests.post('https://api.twistapp.com/api/v2/comments/remove',
+    #                   data={'id': comment['id']},
+    #                   headers=oauth2_headers)
+    #
+    # return new_thread['id']
