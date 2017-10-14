@@ -6,6 +6,13 @@ from .ml import ML
 oauth2_headers = {'Authorization': 'Bearer ' + settings.TWIST_API_KEY}
 
 
+def get_default_channel_id():
+
+    channels = requests.get('https://api.twistapp.com/api/v2/workspaces/get',
+                            headers=oauth2_headers)
+    return json.loads(channels.text)[0]['default_channel']
+
+
 def get_comment_data(comments_parsed, max_messages_count=100):
 
     data = []
@@ -51,9 +58,7 @@ def get_user_by_id(user_id):
 
 def watch_comments():
 
-    channels = requests.get('https://api.twistapp.com/api/v2/workspaces/get',
-                            headers=oauth2_headers)
-    default_channel_id = json.loads(channels.text)[0]['default_channel']
+    default_channel_id = get_default_channel_id()
 
     threads = requests.get('https://api.twistapp.com/api/v2/threads/getone',
                            headers=oauth2_headers, params={'id': '138961'})
@@ -131,3 +136,12 @@ def move_users_comments(channel_id, thread_id, users_to_move):
                       headers=oauth2_headers)
 
     return new_thread_parsed['id']
+
+
+def get_usernames():
+
+    channel_id = get_default_channel_id()
+    channel = requests.get('https://api.twistapp.com/api/v2/channels/getone',
+                            headers=oauth2_headers, params={'id': channel_id})
+    user_ids = json.loads(channel.text)['user_ids']
+    return [get_username_by_id(user_id) for user_id in user_ids]
