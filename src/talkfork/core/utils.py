@@ -41,6 +41,7 @@ def watch_comments():
     comments = requests.get('https://api.twistapp.com/api/v2/comments/get',
                             headers=oauth2_headers, params={'thread_id': default_thread['id']})
     comments_parsed = json.loads(comments.text)
+    on_yes(comments_parsed)
     messages, users = (get_comment_data(comments_parsed), default_thread['participants'])
     ml = ML(users)
     clusters, graph = ml.get_clusters_and_graph(messages)
@@ -50,13 +51,16 @@ def watch_comments():
         GROUPS.append(clusters)
     return graph
 
-def on_yes(comment_id, user):
-    if comment_id in IGNORE_MESSAGES:
-        return
-    IGNORE_MESSAGES.append(comment_id)
-    for group in GROUPS:
-        if user in group:
-            cut_group(user)
-            GROUPS.remove(group)
+def on_yes(comments):
+    for comment in comments:
+        if comment["content"] != "/yes":
+            continue
+        if comment["id"] in IGNORE_MESSAGES:
+            continue
+        IGNORE_MESSAGES.append(comment["id"])
+        for group in GROUPS:
+            if comment["creator"] in group:
+                cut_group(comment["creator"])
+                GROUPS.remove(group)
 
 
