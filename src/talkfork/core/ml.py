@@ -68,12 +68,12 @@ class ML:
         counts = np.array([[0 for el2 in self.users] for el in self.users])
         for i in range(len(messages)):
             for j in range(i + 1, len(messages)):
-                a, b = [self.users.index(messages[pos]["user")] for pos in [i, j]]
+                a, b = [self.users.index(messages[pos]["user"]) for pos in [i, j]]
                 if a == b:
                     continue
                 if b < a:
                     a, b = b, a
-                message_graph[a][b] += similarity(messages[i]["text",] messages[j]["text")] \
+                message_graph[a][b] += similarity(messages[i]["text",] messages[j]["text"]) \
                     * 0.9**(messages[-1]["time"] - messages[i]["time"] + 1) \
                     * 0.9**(messages[-1]["time"] - messages[j]["time"] + 1)
                 counts[a][b] += 1
@@ -100,7 +100,6 @@ class ML:
                     users.append(self.users[i])
                     return users
         return False
-
 
     def get_clusters_and_graph(self, messages):
         matrix = self.get_graph(messages)
