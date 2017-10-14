@@ -27,7 +27,7 @@ def word_similarity(word_1, word_2):
                 sim = wn.path_similarity(synset_1, synset_2)
             if sim and sim > max_sim:
                 max_sim = sim
-                return max_sim
+        return max_sim
 
 
 def similarity(s1, s2):
@@ -81,7 +81,7 @@ class ML:
             for j in range(len(self.users)):
                 if counts[i][j]:
                     graph[i][j] = (graph[i][j]**2 + (message_graph[i][j] / counts[i][j]**0.7)**2)**0.5
-                    return 2 - np.tanh(graph)
+        return 2 - np.tanh(graph)
 
     def get_clusters(self, matrix):
         dists_cond = np.zeros(size_cond(len(matrix)))
