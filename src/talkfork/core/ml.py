@@ -47,23 +47,25 @@ class ML:
     def get_graph(self, messages):
         graph = np.array([[0 for el2 in self.users] for el in self.users], dtype="float")
         for message in messages:
-            from_id = self.users.index(message.user)
-            for to_user in message.recepients:
+            self.users.append(message["user"])
+        for message in messages:
+            from_id = self.users.index(message["user"])
+            for to_user in message["recepients"]:
                 to_id = self.users.index(to_user)
                 if to_id < from_id:
                     from_id, to_id = to_id, from_id
-                graph[from_id][to_id] += 0.9**(messages[-1].time - message.time + 1)
+                graph[from_id][to_id] += 0.9**(messages[-1]["time"] - message["time"] + 1)
         print(graph)
         message_graph = np.array([[0 for el2 in self.users] for el in self.users], dtype="float")
         counts = np.array([[0 for el2 in self.users] for el in self.users])
         for i in range(len(messages)):
             for j in range(len(messages)):
-                a, b = [self.users.index(messages[pos].user) for pos in [i, j]]
+                a, b = [self.users.index(messages[pos]["user")] for pos in [i, j]]
                 if b < a:
                     a, b = b, a
-                message_graph[a][b] += similarity(messages[i].text, messages[j].text) \
-                    * 0.9**(messages[-1].time - messages[i].time + 1) \
-                        * 0.9**(messages[-1].time - messages[j].time + 1)
+                message_graph[a][b] += similarity(messages[i]["text",] messages[j]["text")] \
+                    * 0.9**(messages[-1]["time"] - messages[i]["time"] + 1) \
+                    * 0.9**(messages[-1]["time"] - messages[j]["time"] + 1)
                 counts[a][b] += 1
         for i in range(len(self.users)):
             for j in range(len(self.users)):
