@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>I'll do that!!!</title>
+    <script src="http://d3js.org/d3.v3.min.js" charset="utf-8"></script>
+    <style type="text/css">
+
+    </style>
+</head>
+<body>
+
+<script type="text/javascript">
+
+    var w = 640;
+    var h = 350;
+
+    var colors = d3.scale.category10();
+    var svg = d3.select("body").append("svg").attr({"width": w, "height": h});
+
+    d3.json(" ", function (data_nodes) { // insert link
+//        var dataset = {
+//            nodes: [ name: ],
+//            edges: [source: , targes: , link_distance]
+//        };
+
+        function loadNewData() {
+            d3.json(" ", function (data_edges) { // insert link
+
+                var force = d3.layout.force()
+                    .nodes(data_nodes)
+                    .links(data_edges)
+                    .size([w, h])
+                    .charge([-500])
+                    .theta(0.1)
+                    .gravity(0.05)
+                    .linkDistance("link", function(d) {return d.link_distance})
+                    .start();
+
+                var edges = svg.selectAll("line")
+                    .data(data_edges)
+                    .enter()
+                    .append("line")
+                    .attr("id", function (d, i) {
+                        return 'edge' + i
+                    })
+                    .style("stroke", "#ccc");
+
+                var nodes = svg.selectAll("circle")
+                    .data(data_nodes)
+                    .enter()
+                    .append("circle")
+                    .attr({"r": 15})
+                    .style("fill", function (d, i) {
+                        return colors(i);
+                    })
+                    .call(force.drag);
+
+                var nodelabels = svg.selectAll(".nodelabel")
+                    .data(data_nodes)
+                    .enter()
+                    .append("text")
+                    .attr({
+                        "x": function (d) {
+                            return d.x;
+                        },
+                        "y": function (d) {
+                            return d.y;
+                        },
+                        "class": "nodelabel",
+                        "stroke": "black"
+                    })
+                    .text(function (d) {
+                        return d.name;
+                    });
+
+
+                force.on("tick", function () {
+
+                    edges.attr({
+                        "x1": function (d) {
+                            return d.source.x;
+                        },
+                        "y1": function (d) {
+                            return d.source.y;
+                        },
+                        "x2": function (d) {
+                            return d.target.x;
+                        },
+                        "y2": function (d) {
+                            return d.target.y;
+                        }
+                    });
+
+                    nodes.attr({
+                        "cx": function (d) {
+                            return d.x;
+                        },
+                        "cy": function (d) {
+                            return d.y;
+                        }
+                    });
+
+                    nodelabels.attr("x", function (d) {
+                        return d.x;
+                    })
+                        .attr("y", function (d) {
+                            return d.y;
+                        });
+                });
+
+            });
+        }
+
+        setInterval(function () {
+            loadNewData();
+        }, 20000);
+
+    });
+
+</script>
+</body>
+</html>
