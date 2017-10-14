@@ -3,8 +3,9 @@ from django.shortcuts import render
 import requests
 import json
 from .utils import watch_comments
+from django.conf import settings
 
-oauth2_headers = {'Authorization': 'Bearer oauth2:9b3d62d69d44fb52330e5018a0ea053382236915'}
+oauth2_headers = {'Authorization': 'Bearer ' + settings.TWIST_API_KEY}
 
 
 def oauth2(request):

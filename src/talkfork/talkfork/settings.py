@@ -24,6 +24,7 @@ config.read(os.path.join(BASE_DIR, 'django.conf'))
 
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = config.get('main', 'SECRET')
+TWIST_API_KEY = config.get('main', 'TWIST_API_KEY')
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True

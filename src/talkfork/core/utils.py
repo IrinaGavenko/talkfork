@@ -1,7 +1,8 @@
 import requests
 import json
+from django.conf import settings
 
-oauth2_headers = {'Authorization': 'Bearer oauth2:9b3d62d69d44fb52330e5018a0ea053382236915'}
+oauth2_headers = {'Authorization': 'Bearer ' + settings.TWIST_API_KEY}
 
 
 def get_comment_data(comments_parsed, max_messages_count=100):
@@ -9,7 +10,7 @@ def get_comment_data(comments_parsed, max_messages_count=100):
     data = []
     for comment in comments_parsed[:max_messages_count]:
         comment_data = dict()
-        comment_data['user'] = comment['creator']
+        comment_data['user_id'] = comment['creator']
 
         if comment['recipients'] == 'EVERYONE' or comment['recipients'] == 'EVERYONE_IN_THREAD':
             comment_data['recipients'] = []
@@ -31,12 +32,12 @@ def watch_comments():
 
     threads = requests.get('https://api.twistapp.com/api/v2/threads/get',
                            headers=oauth2_headers, params={'channel_id': default_channel_id})
-    default_thread_id = json.loads(threads.text)[0]['id']
+    default_thread = json.loads(threads.text)[0]
 
     comments = requests.get('https://api.twistapp.com/api/v2/comments/get',
-                            headers=oauth2_headers, params={'thread_id': default_thread_id})
+                            headers=oauth2_headers, params={'thread_id': default_thread['id']})
     comments_parsed = json.loads(comments.text)
-    get_comment_data(comments_parsed)
+    data = (get_comment_data(comments_parsed), default_thread['participants'])
 
     # call ML
 
