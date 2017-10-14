@@ -17,7 +17,7 @@ def word_similarity(word_1, word_2):
     synsets_1 = wn.synsets(word_1)
     synsets_2 = wn.synsets(word_2)
     if len(synsets_1) == 0 or len(synsets_2) == 0:
-        return 1 - edit_distance(word_1, word_2) / max(len(word_1), len(word_1)) 
+        return 1 - edit_distance(word_1, word_2) / max(len(word_1), len(word_1))
     else:
         max_sim = 0
         for synset_1 in synsets_1:
