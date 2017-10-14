@@ -39,6 +39,4 @@ def watch_comments():
     comments_parsed = json.loads(comments.text)
     data = (get_comment_data(comments_parsed), default_thread['participants'])
 
-    # call ML
-
     return []
