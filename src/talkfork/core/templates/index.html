@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en" xmlns="">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+</head>
+<body>
+    <button id="button">OAuth2</button>
+</body>
+
+<script>
+    var csrf_token = "{% csrf_token %}";
+    $("body").bind("ajaxSend", function(elm, xhr, s) {
+       if (s.type === "POST") {
+          xhr.setRequestHeader('X-CSRF-Token', csrf_token);
+       }
+    });
+
+    $("#button").click( function() {
+        window.location = "https://twistapp.com/oauth/authorize?client_id=" +
+            "29143e5e63249f6b617d83c18b21bab3710" +
+            "&scope=user:read" +
+            "&state=a67c4fa81ec3275294cbada1d6fb3f0a6d79aa07";
+    });
+</script>
+
+</html>
