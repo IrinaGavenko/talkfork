@@ -70,15 +70,13 @@ def watch_comments():
         IGNORE_MESSAGES.append(comment["id"])
         for group in GROUPS:
             if comment["creator"] in group:
-                cut_group(comment["creator"])
+                move_users_comments(default_channel_id, default_thread['id'], group)
                 GROUPS.remove(group)
     messages, users = (get_comment_data(comments_parsed), default_thread['participants'])
     ml = ML(users)
     clusters, graph = ml.get_clusters_and_graph(messages)
 
-    users_to_move = []
 
-    move_users_comments(default_channel_id, default_thread['id'], users_to_move)
 
     if clusters:
         send_comment(default_thread, "Hi {}! Seems like your TALK deserves being FORKED. Just type /yes and I'll take care of the rest."
@@ -124,6 +122,7 @@ def move_users_comments(channel_id, thread_id, users_to_move):
                             'content': '**' + get_username_by_id(comment['creator']) + ':** ' + comment['content'],
                             'send_as_integration': 'true'},
                       headers=oauth2_headers)
+        IGNORE_MESSAGES.append(comment["id"])
 
 
     # Remove comments
