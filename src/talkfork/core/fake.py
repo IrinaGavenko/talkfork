@@ -4,15 +4,23 @@ from .tokens import tokens
 from .utils import send_comment
 from . import utils
 
-for token in tokens:
-    utils.oauth2_headers = {'Authorization': 'Bearer ' + tokens[-1]}
-    channels = requests.get('https://api.twistapp.com/api/v2/workspaces/get',
-                            headers=utils.oauth2_headers)
-    default_channel_id = json.loads(channels.text)[0]['default_channel']
+default_thread = '138882'
 
-    threads = requests.get('https://api.twistapp.com/api/v2/threads/get',
-                           headers=utils.oauth2_headers, params={'channel_id': default_channel_id})
-    default_thread = json.loads(threads.text)[0]
+users = []
+
+for token in tokens:
     utils.oauth2_headers = {'Authorization': 'Bearer ' + token}
     send_comment(default_thread["id"], "Test", as_user=True)
+    users.append(requests.get("/api/v2/users/getone").json()["id"])
+
+messages = [
+    (0, [1], "Hi, where are you?"),
+    (4, [], "BIENE"),
+    (1, [0], "I've been waiting at A6 for 3 hours!"),
+    (5, [], "MORE BIENE"),
+    (2, [], "Are there any breakfast leftovers?"),
+    (3, [], "Dinner will be served soon"),
+    (2, [], "Have I missed lunch too?!!")
+    (1, [], "LOL, lunch was at 13")
+]
 

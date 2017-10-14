@@ -93,7 +93,7 @@ class ML:
         clusters = sch.cut_tree(linkage, height=0.7*np.max(dists_cond))
         counter = Counter(clusters)
         cluster, count = counter.most_common(1)
-        if count >= 5:
+        if count >= 2:
             users = []
             for i in range(len(self.users)):
                 if clusters[i] == cluster:
