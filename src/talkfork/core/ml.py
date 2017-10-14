@@ -60,7 +60,7 @@ class ML:
             self.users.append(message["user"])
         for message in messages:
             from_id = self.users.index(message["user"])
-            for to_user in message["recepients"]:
+            for to_user in message["recipients"]:
                 to_id = self.users.index(to_user)
                 if to_id < from_id:
                     from_id, to_id = to_id, from_id
