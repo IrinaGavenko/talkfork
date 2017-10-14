@@ -41,17 +41,6 @@ def watch_comments():
     comments = requests.get('https://api.twistapp.com/api/v2/comments/get',
                             headers=oauth2_headers, params={'thread_id': default_thread['id']})
     comments_parsed = json.loads(comments.text)
-    on_yes(comments_parsed)
-    messages, users = (get_comment_data(comments_parsed), default_thread['participants'])
-    ml = ML(users)
-    clusters, graph = ml.get_clusters_and_graph(messages)
-    if clusters:
-        send_comment(default_thread, "Hi {}! Seems like your TALK deserves being FORKED. Just type /yes and I'll take care of the rest."
-                     .format([get_name(user) for user in clusters]))
-        GROUPS.append(clusters)
-    return graph
-
-def on_yes(comments):
     for comment in comments:
         if comment["content"] != "/yes":
             continue
@@ -62,5 +51,11 @@ def on_yes(comments):
             if comment["creator"] in group:
                 cut_group(comment["creator"])
                 GROUPS.remove(group)
-
-
+    messages, users = (get_comment_data(comments_parsed), default_thread['participants'])
+    ml = ML(users)
+    clusters, graph = ml.get_clusters_and_graph(messages)
+    if clusters:
+        send_comment(default_thread, "Hi {}! Seems like your TALK deserves being FORKED. Just type /yes and I'll take care of the rest."
+                     .format([get_name(user) for user in clusters]))
+        GROUPS.append(clusters)
+    return graph
