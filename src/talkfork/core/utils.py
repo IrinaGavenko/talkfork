@@ -2,6 +2,7 @@ import requests
 import json
 from django.conf import settings
 from .ml import ML
+from .thread import THREAD
 
 oauth2_headers = {'Authorization': 'Bearer ' + settings.TWIST_API_KEY}
 
@@ -56,7 +57,7 @@ def watch_comments():
     default_channel_id = json.loads(channels.text)[0]['default_channel']
 
     threads = requests.get('https://api.twistapp.com/api/v2/threads/getone',
-                           headers=oauth2_headers, params={'id': '138961'})
+                           headers=oauth2_headers, params={'id': THREAD})
     default_thread = json.loads(threads.text)
 
     comments = requests.get('https://api.twistapp.com/api/v2/comments/get',

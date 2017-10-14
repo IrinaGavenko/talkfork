@@ -5,8 +5,9 @@ import json
 from .tokens import tokens
 from .utils import send_comment
 from . import utils
+from .thread import THREAD
 
-default_thread = '138961'
+default_thread = THREAD
 
 users = []
 
