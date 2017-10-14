@@ -99,21 +99,7 @@ class ML:
                     return users
         return False
 
-    def get_clusters(self, messages):
+
+    def get_clusters_and_graph(self, messages):
         matrix = self.get_graph(messages)
-        dists_cond = np.zeros(size_cond(len(matrix)))
-        idx = 0
-        for r in range(len(matrix)-1):
-            dists_cond[idx:idx+len(matrix)-r-1] = matrix[r, r+1:]
-            idx += len(matrix)-r-1
-        linkage = sch.linkage(dists_cond, method="single")
-        clusters = sch.cut_tree(linkage, height=0.7*np.max(dists_cond))
-        counter = Counter(clusters)
-        cluster, count = counter.most_common(1)
-        if count >= 5:
-            users = []
-            for i in range(len(self.users)):
-                if clusters[i] == cluster:
-                    users.append(self.users[i])
-            return users
-        return False
+        return self.get_clusters(matrix), self.convert_graph(matrix)
