@@ -2,7 +2,7 @@ from django.http import HttpResponse
 from django.shortcuts import render
 import requests
 import json
-from .utils import watch_comments
+from .utils import watch_comments, move_users_comments
 from django.conf import settings
 
 oauth2_headers = {'Authorization': 'Bearer ' + settings.TWIST_API_KEY}
@@ -25,6 +25,7 @@ def webhook(request):
 
 def index(request):
 
+    watch_comments()
     return render(request, 'index.html')
 
 
