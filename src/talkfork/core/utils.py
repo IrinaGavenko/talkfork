@@ -66,10 +66,11 @@ def watch_comments():
         GROUPS.append(clusters)
     return graph
 
-def send_comment(thread_id, message):
+def send_comment(thread_id, message, as_user=False):
 
-    requests.post('https://api.twistapp.com/api/v2/comments/add',
-                  data={'thread_id': thread_id, 'content': message},
+    res = requests.post('https://api.twistapp.com/api/v2/comments/add',
+                  data={'thread_id': thread_id, 'content': message,
+                        'send_as_integration': not as_user},
                   headers=oauth2_headers)
 
 

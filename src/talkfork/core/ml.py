@@ -73,7 +73,7 @@ class ML:
                     continue
                 if b < a:
                     a, b = b, a
-                message_graph[a][b] += similarity(messages[i]["text",] messages[j]["text"]) \
+                message_graph[a][b] += similarity(messages[i]["text"],  messages[j]["text"]) \
                     * 0.9**(messages[-1]["time"] - messages[i]["time"] + 1) \
                     * 0.9**(messages[-1]["time"] - messages[j]["time"] + 1)
                 counts[a][b] += 1
