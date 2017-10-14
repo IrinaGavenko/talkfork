@@ -1,28 +1,147 @@
 <!DOCTYPE html>
-<html lang="en" xmlns="">
+<html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <title>Title</title>
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+    <meta charset="utf-8">
+    <title>TalkFork</title>
+    <script src="http://d3js.org/d3.v3.min.js" charset="utf-8"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/vue/2.5.2/vue.min.js" charset="utf-8"></script>
 </head>
 <body>
-    <button id="button">OAuth2</button>
+<div id="#graph">
+<div id="#graph-template">
+    <div v-if="isNotLoaded">Loading...</div>
+    <div v-else><div id="graph-body"></div></div>
+</div>
+</div>
 </body>
+<script type="text/javascript">
 
-<script>
-    var csrf_token = "{% csrf_token %}";
-    $("body").bind("ajaxSend", function(elm, xhr, s) {
-       if (s.type === "POST") {
-          xhr.setRequestHeader('X-CSRF-Token', csrf_token);
-       }
+    var w = 640;
+    var h = 350;
+
+    var colors = d3.scale.category10();
+    var svg = d3.select("#graph-body").append("svg").attr({"width": w, "height": h});
+
+    let Graph = {
+        template: '#graph-template',
+        created() {
+            this.loadNames()
+        },
+        data: function () {
+            return {
+                graph: null,
+            }
+        },
+        methods: {
+            loadNames() {
+                $.ajax({
+                    url: "api/usernames",
+                    success: function (data_nodes) {
+                        $.ajax({
+                            url: 'api/comments',
+                            dataType: 'json',
+                            success: function (data_edges) {
+                                var force = d3.layout.force()
+                                    .nodes(data_nodes)
+                                    .links(data_edges)
+                                    .size([w, h])
+                                    .charge([-500])
+                                    .theta(0.1)
+                                    .gravity(0.05)
+                                    .linkDistance("link", function (d) {
+                                        return d.link_distance
+                                    })
+                                    .start();
+
+                                var edges = svg.selectAll("line")
+                                    .data(data_edges)
+                                    .enter()
+                                    .append("line")
+                                    .attr("id", function (d, i) {
+                                        return 'edge' + i
+                                    })
+                                    .style("stroke", "#ccc");
+
+                                var nodes = svg.selectAll("circle")
+                                    .data(data_nodes)
+                                    .enter()
+                                    .append("circle")
+                                    .attr({"r": 15})
+                                    .style("fill", function (d, i) {
+                                        return colors(i);
+                                    })
+                                    .call(force.drag);
+
+                                var nodelabels = svg.selectAll(".nodelabel")
+                                    .data(data_nodes)
+                                    .enter()
+                                    .append("text")
+                                    .attr({
+                                        "x": function (d) {
+                                            return d.x;
+                                        },
+                                        "y": function (d) {
+                                            return d.y;
+                                        },
+                                        "class": "nodelabel",
+                                        "stroke": "black"
+                                    })
+                                    .text(function (d) {
+                                        return d.name;
+                                    });
+
+                                force.on("tick", function () {
+
+                                    edges.attr({
+                                        "x1": function (d) {
+                                            return d.source.x;
+                                        },
+                                        "y1": function (d) {
+                                            return d.source.y;
+                                        },
+                                        "x2": function (d) {
+                                            return d.target.x;
+                                        },
+                                        "y2": function (d) {
+                                            return d.target.y;
+                                        }
+                                    });
+
+                                    nodes.attr({
+                                        "cx": function (d) {
+                                            return d.x;
+                                        },
+                                        "cy": function (d) {
+                                            return d.y;
+                                        }
+                                    });
+
+                                    nodelabels.attr("x", function (d) {
+                                        return d.x;
+                                    })
+                                        .attr("y", function (d) {
+                                            return d.y;
+                                        });
+                                });
+                            }
+                        });
+                    }
+                });
+            }
+        },
+        computed: {
+            isNotLoaded() {
+                return (this.graph === null)
+            },
+        }
+    };
+
+    new Vue({
+        el: '#graph',
+        components: {
+            graph: Graph,
+        }
     });
 
-    $("#button").click( function() {
-        window.location = "https://twistapp.com/oauth/authorize?client_id=" +
-            "29143e5e63249f6b617d83c18b21bab3710" +
-            "&scope=user:read" +
-            "&state=a67c4fa81ec3275294cbada1d6fb3f0a6d79aa07";
-    });
 </script>
-
 </html>
