@@ -27,7 +27,7 @@ def word_similarity(word_1, word_2):
                 sim = wn.path_similarity(synset_1, synset_2)
             if sim and sim > max_sim:
                 max_sim = sim
-                return max_sim
+        return max_sim
 
 
 def similarity(s1, s2):
