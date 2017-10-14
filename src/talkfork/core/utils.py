@@ -38,6 +38,4 @@ def watch_comments():
     comments_parsed = json.loads(comments.text)
     get_comment_data(comments_parsed)
 
-    # call ML
-
     return []

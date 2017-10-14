@@ -40,9 +40,17 @@ def similarity(s1, s2):
     best_2 = np.mean(np.apply_along_axis(np.max, 0, pairwise))
     return np.max([best_1, best_2])
 
+
 class ML:
     def __init__(self, users):
         self.users = users
+
+    def convert_graph(self, graph):
+        data = []
+        for i in range(len(self.users)):
+            for j in range(i + 1, len(self.users)):
+                data.append({"source": self.users[i], "target": self.users[j], "link_distance": graph[i][j]})
+        return data
 
     def get_graph(self, messages):
         graph = np.array([[0 for el2 in self.users] for el in self.users], dtype="float")
@@ -73,8 +81,7 @@ class ML:
                     graph[i][j] = (graph[i][j]**2 + (message_graph[i][j] / counts[i][j]**0.7)**2)**0.5
                     return 2 - np.tanh(graph)
 
-    def get_clusters(self, messages):
-        matrix = self.get_graph(messages)
+    def get_clusters(self, matrix):
         dists_cond = np.zeros(size_cond(len(matrix)))
         idx = 0
         for r in range(len(matrix)-1):
@@ -90,7 +97,7 @@ class ML:
                 if clusters[i] == cluster:
                     users.append(self.users[i])
                     return users
-                    return False
+        return False
 
     def get_clusters(self, messages):
         matrix = self.get_graph(messages)
