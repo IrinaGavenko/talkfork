@@ -25,6 +25,9 @@ def get_comment_data(comments_parsed, max_messages_count=100):
     return data
 
 
+GROUPS = []
+IGNORE_MESSAGES = []
+
 def watch_comments():
 
     channels = requests.get('https://api.twistapp.com/api/v2/workspaces/get',
@@ -42,6 +45,18 @@ def watch_comments():
     ml = ML(users)
     clusters, graph = ml.get_clusters_and_graph(messages)
     if clusters:
-        #notify about clique
-
+        send_comment(default_thread, "Hi {}! Seems like your TALK deserves being FORKED. Just type /yes and I'll take care of the rest."
+                     .format([get_name(user) for user in clusters]))
+        GROUPS.append(clusters)
     return graph
+
+def on_yes(comment_id, user):
+    if comment_id in IGNORE_MESSAGES:
+        return
+    IGNORE_MESSAGES.append(comment_id)
+    for group in GROUPS:
+        if user in group:
+            cut_group(user)
+            GROUPS.remove(group)
+
+
