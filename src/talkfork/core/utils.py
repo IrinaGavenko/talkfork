@@ -1,6 +1,7 @@
 import requests
 import json
 from django.conf import settings
+from .ml import ML
 
 oauth2_headers = {'Authorization': 'Bearer ' + settings.TWIST_API_KEY}
 
@@ -37,6 +38,10 @@ def watch_comments():
     comments = requests.get('https://api.twistapp.com/api/v2/comments/get',
                             headers=oauth2_headers, params={'thread_id': default_thread['id']})
     comments_parsed = json.loads(comments.text)
-    data = (get_comment_data(comments_parsed), default_thread['participants'])
+    messages, users = (get_comment_data(comments_parsed), default_thread['participants'])
+    ml = ML(users)
+    clusters, graph = ml.get_clusters_and_graph(messages)
+    if clusters:
+        #notify about clique
 
-    return []
+    return graph
