@@ -67,8 +67,10 @@ class ML:
         message_graph = np.array([[0 for el2 in self.users] for el in self.users], dtype="float")
         counts = np.array([[0 for el2 in self.users] for el in self.users])
         for i in range(len(messages)):
-            for j in range(len(messages)):
+            for j in range(i + 1, len(messages)):
                 a, b = [self.users.index(messages[pos]["user")] for pos in [i, j]]
+                if a == b:
+                    continue
                 if b < a:
                     a, b = b, a
                 message_graph[a][b] += similarity(messages[i]["text",] messages[j]["text")] \
