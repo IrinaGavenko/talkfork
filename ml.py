@@ -68,7 +68,7 @@ class ML:
         for i in range(len(self.users)):
             for j in range(len(self.users)):
                 if counts[i][j]:
-                    graph[i][j] = (graph[i][j]**2 + (message_graph[i][j] / counts[i][j])**2)**0.5
+                    graph[i][j] = (graph[i][j]**2 + (message_graph[i][j] / counts[i][j]**0.7)**2)**0.5
                     return 2 - np.tanh(graph)
 
     def get_clusters(self, messages):
