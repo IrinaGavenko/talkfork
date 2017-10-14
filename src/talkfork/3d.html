@@ -2,122 +2,124 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>I'll do that!!!</title>
+    <title>Talkfork</title>
     <script src="http://d3js.org/d3.v3.min.js" charset="utf-8"></script>
     <style type="text/css">
-
     </style>
 </head>
 <body>
 
 <script type="text/javascript">
 
-    var w = 640;
-    var h = 350;
+    var w = 1000;
+    var h = 600;
 
     var colors = d3.scale.category10();
-    var svg = d3.select("body").append("svg").attr({"width": w, "height": h});
 
-    d3.json(" ", function (data_nodes) { // insert link
-//        var dataset = {
-//            nodes: [ name: ],
-//            edges: [source: , targes: , link_distance]
-//        };
+    var dataset = {
 
-        function loadNewData() {
-            d3.json(" ", function (data_edges) { // insert link
-
-                var force = d3.layout.force()
-                    .nodes(data_nodes)
-                    .links(data_edges)
-                    .size([w, h])
-                    .charge([-500])
-                    .theta(0.1)
-                    .gravity(0.05)
-                    .linkDistance("link", function(d) {return d.link_distance})
-                    .start();
-
-                var edges = svg.selectAll("line")
-                    .data(data_edges)
-                    .enter()
-                    .append("line")
-                    .attr("id", function (d, i) {
-                        return 'edge' + i
-                    })
-                    .style("stroke", "#ccc");
-
-                var nodes = svg.selectAll("circle")
-                    .data(data_nodes)
-                    .enter()
-                    .append("circle")
-                    .attr({"r": 15})
-                    .style("fill", function (d, i) {
-                        return colors(i);
-                    })
-                    .call(force.drag);
-
-                var nodelabels = svg.selectAll(".nodelabel")
-                    .data(data_nodes)
-                    .enter()
-                    .append("text")
-                    .attr({
-                        "x": function (d) {
-                            return d.x;
-                        },
-                        "y": function (d) {
-                            return d.y;
-                        },
-                        "class": "nodelabel",
-                        "stroke": "black"
-                    })
-                    .text(function (d) {
-                        return d.name;
-                    });
+        nodes: [
+            {name: "Aaa"},
+            {name: "Bbb"},
+            {name: "Ccc"},
+            {name: "Ddd"},
+            {name: "Eee"},
+            {name: "Ffff"},
+            {name: "Gggg"},
+            {name: "Hhhh"},
+            {name: "Iii"},
+            {name: "Jjj"}
+        ],
+        edges: [
+            {source: 0, target: 1, link_distance: 100},
+            {source: 0, target: 2, link_distance: 200},
+            {source: 0, target: 3, link_distance: 300},
+            {source: 0, target: 4, link_distance: 100},
+            {source: 1, target: 5, link_distance: 200},
+            {source: 2, target: 5, link_distance: 500},
+            {source: 2, target: 5, link_distance: 300},
+            {source: 3, target: 4, link_distance: 200},
+            {source: 5, target: 8, link_distance: 100},
+            {source: 5, target: 9, link_distance: 100},
+            {source: 6, target: 7, link_distance: 200},
+            {source: 7, target: 8, link_distance: 200},
+            {source: 8, target: 9, link_distance: 200}
+        ]
+    };
 
 
-                force.on("tick", function () {
+    var svg = d3.select("body").append("svg").attr({"width":w,"height":h});
 
-                    edges.attr({
-                        "x1": function (d) {
-                            return d.source.x;
-                        },
-                        "y1": function (d) {
-                            return d.source.y;
-                        },
-                        "x2": function (d) {
-                            return d.target.x;
-                        },
-                        "y2": function (d) {
-                            return d.target.y;
-                        }
-                    });
+    var force = d3.layout.force()
+        .nodes(dataset.nodes)
+        .links(dataset.edges)
+        .size([w,h])
+        .linkDistance(function(d) {return d.link_distance})
+        .charge([-500])
+        .theta(0.1)
+        .gravity(0.05)
+        .start();
 
-                    nodes.attr({
-                        "cx": function (d) {
-                            return d.x;
-                        },
-                        "cy": function (d) {
-                            return d.y;
-                        }
-                    });
 
-                    nodelabels.attr("x", function (d) {
-                        return d.x;
-                    })
-                        .attr("y", function (d) {
-                            return d.y;
-                        });
-                });
 
-            });
-        }
+    var edges = svg.selectAll("line")
+        .data(dataset.edges)
+        .enter()
+        .append("line")
+        .attr("id",function(d,i) {return 'edge'+i})
+        .style("stroke","#ccc")
+        .style("pointer-events", "none");
 
-        setInterval(function () {
-            loadNewData();
-        }, 20000);
+    var nodes = svg.selectAll("circle")
+        .data(dataset.nodes)
+        .enter()
+        .append("circle")
+        .attr({"r":15})
+        .style("fill",function(d,i){return colors(i);})
+        .call(force.drag)
+
+
+    var nodelabels = svg.selectAll(".nodelabel")
+        .data(dataset.nodes)
+        .enter()
+        .append("text")
+        .attr({"x":function(d){return d.x;},
+            "y":function(d){return d.y;},
+            "class":"nodelabel",
+            "stroke":"black"})
+        .text(function(d){return d.name;});
+
+    var edgepaths = svg.selectAll(".edgepath")
+        .data(dataset.edges)
+        .enter()
+        .append('path')
+        .attr({'d': function(d) {return 'M '+d.source.x+' '+d.source.y+' L '+ d.target.x +' '+d.target.y},
+            'class':'edgepath',
+            'fill-opacity':0,
+            'stroke-opacity':0,
+            'fill':'blue',
+            'stroke':'red',
+            'id':function(d,i) {return 'edgepath'+i}})
+        .style("pointer-events", "none");
+
+    force.on("tick", function(){
+
+        edges.attr({"x1": function(d){return d.source.x;},
+            "y1": function(d){return d.source.y;},
+            "x2": function(d){return d.target.x;},
+            "y2": function(d){return d.target.y;}
+        });
+
+        nodes.attr({"cx":function(d){return d.x;},
+            "cy":function(d){return d.y;}
+        });
+
+        nodelabels.attr("x", function(d) { return d.x; })
+            .attr("y", function(d) { return d.y; });
 
     });
 
 </script>
+
 </body>
 </html>
