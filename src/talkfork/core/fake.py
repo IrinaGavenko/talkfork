@@ -6,7 +6,7 @@ from .tokens import tokens
 from .utils import send_comment
 from . import utils
 
-default_thread = '138936'
+default_thread = '138961'
 
 users = []
 
@@ -23,7 +23,10 @@ messages = [
     (3, [], "Dinner will be served soon"),
     (2, [], "BIENE"),
     (2, [], "Have I missed lunch too?!!"),
-    (1, [], "LOL, lunch was at 13")
+    (0, [], "BIENE"),
+    (3, [], "LOL, lunch was at 13"),
+    (2, [], "Really, no lunch for me?"),
+    (3, [], "Really, no lunch!")
 ]
 
 for message in messages:

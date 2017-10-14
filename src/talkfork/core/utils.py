@@ -55,9 +55,9 @@ def watch_comments():
                             headers=oauth2_headers)
     default_channel_id = json.loads(channels.text)[0]['default_channel']
 
-    threads = requests.get('https://api.twistapp.com/api/v2/threads/get',
-                           headers=oauth2_headers, params={'channel_id': default_channel_id})
-    default_thread = json.loads(threads.text)[0]
+    threads = requests.get('https://api.twistapp.com/api/v2/threads/getone',
+                           headers=oauth2_headers, params={'id': '138961'})
+    default_thread = json.loads(threads.text)
 
     comments = requests.get('https://api.twistapp.com/api/v2/comments/get',
                             headers=oauth2_headers, params={'thread_id': default_thread['id']})

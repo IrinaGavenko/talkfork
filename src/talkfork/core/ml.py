@@ -20,7 +20,7 @@ def word_similarity(word_1, word_2):
     synsets_1 = wn.synsets(word_1)
     synsets_2 = wn.synsets(word_2)
     if len(synsets_1) == 0 or len(synsets_2) == 0:
-        return 1 - edit_distance(word_1, word_2) / max(len(word_1), len(word_1))
+        return word_1 == word_2
     else:
         max_sim = 0
         for synset_1 in synsets_1:
@@ -39,8 +39,8 @@ def similarity(s1, s2):
     if not words_1 or not words_2:
         return 0
     pairwise = np.array([[word_similarity(a, b) for a in words_1] for b in words_2])
-    best_1 = np.mean(np.apply_along_axis(np.max, 1, pairwise))
-    best_2 = np.mean(np.apply_along_axis(np.max, 0, pairwise))
+    best_1 = np.max(np.apply_along_axis(np.max, 1, pairwise))
+    best_2 = np.max(np.apply_along_axis(np.max, 0, pairwise))
     return np.max([best_1, best_2])
 
 
@@ -66,7 +66,7 @@ class ML:
                 to_id = self.users.index(to_user)
                 if to_id < from_id:
                     from_id, to_id = to_id, from_id
-                graph[from_id][to_id] += 0.9**(messages[-1]["time"] - message["time"] + 1)
+                graph[from_id][to_id] += 0.99**(messages[-1]["time"] - message["time"] + 1)
         message_graph = np.array([[0 for el2 in self.users] for el in self.users], dtype="float")
         counts = np.array([[0 for el2 in self.users] for el in self.users])
         for i in range(len(messages)):
@@ -77,8 +77,8 @@ class ML:
                 if b < a:
                     a, b = b, a
                 message_graph[a][b] += similarity(messages[i]["text"],  messages[j]["text"]) \
-                    * 0.9**(messages[-1]["time"] - messages[i]["time"] + 1) \
-                    * 0.9**(messages[-1]["time"] - messages[j]["time"] + 1)
+                    * 0.99**(messages[-1]["time"] - messages[i]["time"] + 1) \
+                    * 0.99**(messages[-1]["time"] - messages[j]["time"] + 1)
                 counts[a][b] += 1
         for i in range(len(self.users)):
             for j in range(len(self.users)):
@@ -94,7 +94,8 @@ class ML:
             idx += len(matrix)-r-1
         linkage = sch.linkage(dists_cond, method="single")
         sch.dendrogram(linkage)
-        plt.show()
+        plt.savefig("test.png")
+        plt.gcf().clear()
         clusters = sch.cut_tree(linkage, height=0.7*np.max(dists_cond))
         print(clusters)
         counter = Counter(clusters.flatten())
