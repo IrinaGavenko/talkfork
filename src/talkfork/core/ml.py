@@ -1,4 +1,6 @@
 import nltk
+from nltk.corpus import wordnet as wn
+from nltk.metrics.distance import edit_distance
 import scipy.cluster.hierarchy as sch
 import math
 import numpy as np
