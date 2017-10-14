@@ -4,5 +4,5 @@ from . import views
 
 urlpatterns = [
     url(r'^$', views.index, name='index'),
-    url(r'^twist/webhook/$', views.webhook, name='webhook'),
+    url(r'^api/comments/$', views.comments, name='comments'),
 ]
