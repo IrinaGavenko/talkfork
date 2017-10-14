@@ -5,6 +5,7 @@ import scipy.cluster.hierarchy as sch
 import math
 import numpy as np
 from collections import Counter
+from matplotlib import pyplot as plt
 
 
 def size_cond(size):
@@ -65,7 +66,7 @@ class ML:
                 to_id = self.users.index(to_user)
                 if to_id < from_id:
                     from_id, to_id = to_id, from_id
-                graph[from_id][to_id] += 1
+                graph[from_id][to_id] += 0.9**(messages[-1]["time"] - message["time"] + 1)
         message_graph = np.array([[0 for el2 in self.users] for el in self.users], dtype="float")
         counts = np.array([[0 for el2 in self.users] for el in self.users])
         for i in range(len(messages)):
@@ -75,7 +76,9 @@ class ML:
                     continue
                 if b < a:
                     a, b = b, a
-                message_graph[a][b] += similarity(messages[i]["text"],  messages[j]["text"])
+                message_graph[a][b] += similarity(messages[i]["text"],  messages[j]["text"]) \
+                    * 0.9**(messages[-1]["time"] - messages[i]["time"] + 1) \
+                    * 0.9**(messages[-1]["time"] - messages[j]["time"] + 1)
                 counts[a][b] += 1
         for i in range(len(self.users)):
             for j in range(len(self.users)):
@@ -90,15 +93,16 @@ class ML:
             dists_cond[idx:idx+len(matrix)-r-1] = matrix[r, r+1:]
             idx += len(matrix)-r-1
         linkage = sch.linkage(dists_cond, method="single")
+        sch.dendrogram(linkage)
+        plt.show()
         clusters = sch.cut_tree(linkage, height=0.7*np.max(dists_cond))
         print(clusters)
         counter = Counter(clusters.flatten())
-        cluster, count = counter.most_common(1)[0]
-        if count >= 2:
-            print(cluster)
+        cluster = counter.most_common(2)
+        if cluster[1][1] >= 2:
             users = []
             for i in range(len(self.users)):
-                if clusters[i] == cluster:
+                if clusters[i] == cluster[0][0]:
                     users.append(self.users[i])
             return users
         return False

@@ -6,7 +6,7 @@ from .tokens import tokens
 from .utils import send_comment
 from . import utils
 
-default_thread = '138927'
+default_thread = '138936'
 
 users = []
 
