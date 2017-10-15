@@ -38,83 +38,86 @@
 
     var colors = d3.scale.category10();
 
+    var svg = d3.select("body").append("svg").attr({"width":w,"height":h});
     $.ajax({
         url: '/api/usernames/',
         dataType: 'json',
         success: function(dataNodes) {
+            function update_edges(dataEdges) {
+
+                var force = d3.layout.force()
+                    .nodes(dataNodes)
+                    .links(dataEdges)
+                    .size([w,h])
+                    .linkDistance(function(d) {return d.link_distance})
+                    .charge([-500])
+                    .theta(0.1)
+                    .gravity(0.05)
+                    .start();
+
+                var edges = svg.selectAll("line")
+                    .data(dataEdges)
+                    .enter()
+                    .append("line")
+                    .attr("id",function(d,i) {return 'edge'+i})
+                    .style("stroke","#ccc")
+                    .style("pointer-events", "none");
+            
+                var nodes = svg.selectAll("circle")
+                    .data(dataNodes)
+                    .enter()
+                    .append("circle")
+                    .attr({"r":15})
+                    .style("fill",function(d,i){return colors(i);})
+                    .call(force.drag)
+            
+            
+                var nodelabels = svg.selectAll(".nodelabel")
+                    .data(dataNodes)
+                    .enter()
+                    .append("text")
+                    .attr({"x":function(d){return d.x;},
+                        "y":function(d){return d.y;},
+                        "class":"nodelabel"})
+                    .text(function(d){return d.name;});
+            
+                var edgepaths = svg.selectAll(".edgepath")
+                    .data(dataEdges)
+                    .enter()
+                    .append('path')
+                    .attr({'d': function(d) {return 'M '+d.source.x+' '+d.source.y+' L '+ d.target.x +' '+d.target.y},
+                        'class':'edgepath',
+                        'fill-opacity':0,
+                        'stroke-opacity':0,
+                        'fill':'blue',
+                        'stroke':'red',
+                        'id':function(d,i) {return 'edgepath'+i}})
+                    .style("pointer-events", "none");
+            
+                force.on("tick", function(){
+            
+                    edges.attr({"x1": function(d){return d.source.x;},
+                        "y1": function(d){return d.source.y;},
+                        "x2": function(d){return d.target.x;},
+                        "y2": function(d){return d.target.y;}
+                    });
+            
+                    nodes.attr({"cx":function(d){return d.x;},
+                        "cy":function(d){return d.y;}
+                    });
+            
+                    nodelabels.attr("x", function(d) { return d.x; })
+                        .attr("y", function(d) { return d.y; });});
+                    $.ajax({
+                        url: '/api/comments/',
+                        dataType: 'json',
+                        success: update_edges});
+                };
             $.ajax({
                 url: '/api/comments/',
                 dataType: 'json',
-                success: function(dataEdges) {
-                    var svg = d3.select("body").append("svg").attr({"width":w,"height":h});
-
-                    var force = d3.layout.force()
-                        .nodes(dataNodes)
-                        .links(dataEdges)
-                        .size([w,h])
-                        .linkDistance(function(d) {return d.link_distance})
-                        .charge([-500])
-                        .theta(0.1)
-                        .gravity(0.05)
-                        .start();
-
-                    var edges = svg.selectAll("line")
-                        .data(dataEdges)
-                        .enter()
-                        .append("line")
-                        .attr("id",function(d,i) {return 'edge'+i})
-                        .style("stroke","#ccc")
-                        .style("pointer-events", "none");
-                
-                    var nodes = svg.selectAll("circle")
-                        .data(dataNodes)
-                        .enter()
-                        .append("circle")
-                        .attr({"r":15})
-                        .style("fill",function(d,i){return colors(i);})
-                        .call(force.drag)
-                
-                
-                    var nodelabels = svg.selectAll(".nodelabel")
-                        .data(dataNodes)
-                        .enter()
-                        .append("text")
-                        .attr({"x":function(d){return d.x;},
-                            "y":function(d){return d.y;},
-                            "class":"nodelabel"})
-                        .text(function(d){return d.name;});
-                
-                    var edgepaths = svg.selectAll(".edgepath")
-                        .data(dataEdges)
-                        .enter()
-                        .append('path')
-                        .attr({'d': function(d) {return 'M '+d.source.x+' '+d.source.y+' L '+ d.target.x +' '+d.target.y},
-                            'class':'edgepath',
-                            'fill-opacity':0,
-                            'stroke-opacity':0,
-                            'fill':'blue',
-                            'stroke':'red',
-                            'id':function(d,i) {return 'edgepath'+i}})
-                        .style("pointer-events", "none");
-                
-                    force.on("tick", function(){
-                
-                        edges.attr({"x1": function(d){return d.source.x;},
-                            "y1": function(d){return d.source.y;},
-                            "x2": function(d){return d.target.x;},
-                            "y2": function(d){return d.target.y;}
-                        });
-                
-                        nodes.attr({"cx":function(d){return d.x;},
-                            "cy":function(d){return d.y;}
-                        });
-                
-                        nodelabels.attr("x", function(d) { return d.x; })
-                            .attr("y", function(d) { return d.y; });
-                
-                    });
-                }
-            });
+                success: update_edges
+                });
         }
     });
     
