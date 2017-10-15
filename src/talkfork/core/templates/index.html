@@ -12,33 +12,41 @@
 
     <style>
         .header {
-            font-family: "Open Sans", Helvetica, Arial, sans-serif;
-            margin-top: 30px;
-            font-size: 70px;
+            margin-top: 20px;
+            margin-bottom: 10px;
+            font-size: 80px;
             width: 100%;
             text-align: center;
-            color: #516488;
+            color: #6f716e;
         }
         body {
+            font-family: "Open Sans", Helvetica, Arial, sans-serif;
             background: #a1ffce;
             background: -webkit-linear-gradient(to right, #a1ffce, #faffd1);
-            background: linear-gradient(to right, #a1ffce, #faffd1);
+            background: linear-gradient(to right, #abbaab, #ffffff);
+        }
+        #svg-container {
+            width: 100%;
+            text-align: center;
+            margin: 0 auto;
         }
     </style>
 
 </head>
 <body>
 
-<h1 class="header">TalkFORK</h1>
+<div class="header">TalkFORK</div>
+
+<div id="svg-container"></div>
 </body>
 <script>
 
     var w = 1000;
-    var h = 600;
+    var h = 500;
 
     var colors = d3.scale.category10();
 
-    var svg = d3.select("body").append("svg").attr({"width":w,"height":h});
+    var svg = d3.select("#svg-container").append("svg").attr({"width":w,"height":h});
     $.ajax({
         url: '/api/usernames/',
         dataType: 'json',
