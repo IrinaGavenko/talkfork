@@ -44,7 +44,7 @@
         dataType: 'json',
         success: function(dataNodes) {
             function update_edges(dataEdges) {
-
+                d3.selectAll("svg > *").remove();
                 var force = d3.layout.force()
                     .nodes(dataNodes)
                     .links(dataEdges)
@@ -108,16 +108,18 @@
             
                     nodelabels.attr("x", function(d) { return d.x; })
                         .attr("y", function(d) { return d.y; });});
-                    $.ajax({
+                    setTimeout(
+                        function () {$.ajax({
                         url: '/api/comments/',
                         dataType: 'json',
-                        success: update_edges});
+                        success: update_edges
+                        });},
+                        2000);
                 };
-            $.ajax({
-                url: '/api/comments/',
-                dataType: 'json',
-                success: update_edges
-                });
+                $.ajax({
+                    url: '/api/comments/',
+                    dataType: 'json',
+                    success: update_edges});
         }
     });
     
